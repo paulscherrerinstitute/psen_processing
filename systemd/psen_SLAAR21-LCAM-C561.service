@@ -1,0 +1,16 @@
+[Unit]
+Description=psen_processing service
+After=docker.service
+Requires=docker.service
+
+[Install]
+WantedBy=default.target
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill psen_SLAAR21-LCAM-C561
+ExecStartPre=-/usr/bin/docker rm psen_SLAAR21-LCAM-C561
+ExecStartPre=/usr/bin/docker pull docker.psi.ch:5000/psen_processing
+ExecStart=/usr/bin/docker run --name psen_SLAAR21-LCAM-C561 --net=host docker.psi.ch:5000/psen_processing psen_processing --input_stream tcp://localhost:8888
+ExecStop=/usr/bin/docker stop psen_SLAAR21-LCAM-C561
+Restart=always

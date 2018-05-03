@@ -1,0 +1,24 @@
+package:
+    name: psen_processing
+    version: 0.0.1
+
+source:
+    path: ..
+
+build:
+    number: 0
+
+requirements:
+    build:
+        - python
+
+    run:
+        - python
+        - cam_server
+
+build:
+  entry_points:
+    - psen_processing = psen_processing.start_processing:main
+
+about:
+    home: https://github.com/paulscherrerinstitute/psen_processing
