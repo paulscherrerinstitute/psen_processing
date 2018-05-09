@@ -3,6 +3,7 @@ from threading import Event, Thread
 from logging import getLogger
 
 from psen_processing import config
+from psen_processing.utils import validate_roi
 
 _logger = getLogger(__name__)
 
@@ -56,10 +57,20 @@ class ProcessingManager(object):
         self.running_flag = None
 
     def set_roi_background(self, roi_background):
-        pass
+
+        if roi_background is not None:
+            validate_roi(roi_background)
+
+        _logger.info("Setting ROI background to %s.", roi_background)
+        self.roi_background = roi_background
 
     def set_roi_signal(self, roi_signal):
-        pass
+
+        if roi_signal is not None:
+            validate_roi(roi_signal)
+
+        _logger.info("Setting ROI signal to %s.", roi_signal)
+        self.roi_signal = roi_signal
 
     def get_roi_background(self):
         return self.roi_background
