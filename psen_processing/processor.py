@@ -26,9 +26,9 @@ def process_image(image, image_property_name, roi_signal, roi_background):
         processed_data[image_property_name + "_roi_signal_x_profile"] = get_roi_x_profile(image, roi_signal)
 
     if roi_background:
-        processed_data[image_property_name + "_roi_background_y_profile"] = get_roi_x_profile(image, roi_background)
+        processed_data[image_property_name + "_roi_background_x_profile"] = get_roi_x_profile(image, roi_background)
 
-    return {}
+    return processed_data
 
 
 def get_stream_processor(input_stream_host, input_stream_port, output_stream_port, epics_pv_name_prefix):
