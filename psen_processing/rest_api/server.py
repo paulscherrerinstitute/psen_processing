@@ -13,12 +13,30 @@ def register_rest_interface(app, instance_manager):
 
     api_root_address = config.API_PREFIX
 
+    @app.post(api_root_address + "/start")
+    def start():
+        instance_manager.start()
+
+        return {"state": "ok",
+                "status": instance_manager.get_status()}
+
+    @app.post(api_root_address + "/stop")
+    def stop():
+        instance_manager.stop()
+
+        return {"state": "ok",
+                "status": instance_manager.get_status()}
+
+    def get_status():
+        return {"state": "ok",
+                "status": instance_manager.get_status()}
+
     @app.get(api_root_address + "/roi")
     @app.get(api_root_address + "/roi/<int:roi_index>")
     def get_roi(roi_index=None):
 
         return {"state": "ok",
-                "status": "Current ROI configuration.s",
+                "status": instance_manager.get_status(),
                 "cameras": instance_manager.get_roi(roi_index)}
 
     @app.post(api_root_address + "/roi/<int:roi_index>")
@@ -27,14 +45,14 @@ def register_rest_interface(app, instance_manager):
         roi_config = request.json
 
         return {"state": "ok",
-                "status": "ROI index %d is set." % roi_index,
+                "status": instance_manager.get_status(),
                 "stream": instance_manager.set_roi(roi_index, roi_config)}
 
     @app.get(api_root_address + "/statistics")
     def get_statistics():
 
         return {"state": "ok",
-                "status": "Instance statistics.",
+                "status": instance_manager.get_status(),
                 "statistics": instance_manager.get_statistics()}
 
     @app.error(405)
