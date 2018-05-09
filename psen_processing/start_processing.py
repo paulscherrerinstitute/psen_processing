@@ -1,6 +1,9 @@
 import argparse
 import logging
 
+import bottle
+from cam_server.utils import get_host_port_from_stream_address
+
 from psen_processing import config
 from psen_processing.manager import ProcessingManager
 from psen_processing.processor import get_stream_processor
@@ -9,13 +12,18 @@ from psen_processing.rest_api.server import register_rest_interface
 _logger = logging.getLogger(__name__)
 
 
-def start_processing(input_stream, output_stream_port, rest_api_interface, rest_api_port, bs_data_prefix, auto_start):
-    _logger.info("Receiving data from %s. and outputting results on port %s with bsread data prefix %s.",
-                 input_stream, output_stream_port, bs_data_prefix)
+def start_processing(input_stream, output_stream_port, rest_api_interface, rest_api_port,
+                     epics_pv_name_prefix, auto_start):
 
-    stream_processor = get_stream_processor(input_stream=input_stream,
+    _logger.info("Receiving data from %s and outputting results on port %s.", input_stream, output_stream_port)
+    _logger.info("Looking for image with Epics PV name prefix '%s'.", epics_pv_name_prefix)
+
+    input_stream_host, input_stream_port = get_host_port_from_stream_address(input_stream)
+
+    stream_processor = get_stream_processor(input_stream_host=input_stream_host,
+                                            input_stream_port=input_stream_port,
                                             output_stream_port=output_stream_port,
-                                            bs_data_prefix=bs_data_prefix)
+                                            epics_pv_name_prefix=epics_pv_name_prefix)
 
     _logger.info("Auto start set to %s.", auto_start)
     manager = ProcessingManager(stream_processor, auto_start)
@@ -34,12 +42,12 @@ def start_processing(input_stream, output_stream_port, rest_api_interface, rest_
 def main():
     parser = argparse.ArgumentParser(description='PSEN camera processing.')
     parser.add_argument('-i', '--input_stream', help="Input bsread stream to process.")
+    parser.add_argument('-p', '--prefix', help="Epics PV prefix of the image.")
     parser.add_argument('-o', '--output_stream_port', default=config.DEFAULT_OUTPUT_STREAM_PORT,
                         help="Output bsread stream port.")
     parser.add_argument('-r', '--rest_api_port', default=config.DEFAULT_REST_API_PORT, help="REST Api port.")
     parser.add_argument('--rest_api_interface', default=config.DEFAULT_REST_API_INTERFACE,
                         help="Hostname interface to bind to")
-    parser.add_argument('-p', '--prefix', default=None, help="Prefix to append to bsread value names in output stream.")
     parser.add_argument("--log_level", default=config.DEFAULT_LOGGING_LEVEL,
                         choices=['CRITICAL', 'ERROR', 'WARNING', 'INFO', 'DEBUG'],
                         help="Log level to use.")
@@ -55,7 +63,7 @@ def main():
                      output_stream_port=arguments.output_stream_port,
                      rest_api_interface=arguments.rest_api_interface,
                      rest_api_port=arguments.rest_api_port,
-                     bs_data_prefix=arguments.prefix,
+                     epics_pv_name_prefix=arguments.prefix,
                      auto_start=arguments.auto_start)
 
 

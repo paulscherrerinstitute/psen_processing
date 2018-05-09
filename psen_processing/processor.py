@@ -1,30 +1,53 @@
 import datetime
 from logging import getLogger
 
-from bsread import source
+from bsread import source, json, PULL
 from bsread.sender import sender
+from cam_server.pipeline.data_processing import functions
 
 from psen_processing import config
 
 _logger = getLogger(__name__)
 
 
-def process_message(message, roi_signal, roi_background, bs_data_prefix=""):
+def get_roi_x_profile(image, roi):
+    offset_x, size_x, offset_y, size_y = roi
+    roi_image = functions.get_region_of_interest(image, offset_x, size_x, offset_y, size_y)
+
+    return roi_image.sum(0)
+
+
+def process_image(image, image_property_name, roi_signal, roi_background):
+    processed_data = dict()
+
+    processed_data[image_property_name + "_processing_parameters"] = json.dumps({"roi_signal": roi_signal,
+                                                                                 "roi_background": roi_background})
+
+    if roi_signal:
+        processed_data[image_property_name + "_roi_signal_x_profile"] = get_roi_x_profile(image, roi_signal)
+
+    if roi_background:
+        processed_data[image_property_name + "_roi_background_y_profile"] = get_roi_x_profile(image, roi_background)
+
     return {}
 
 
-def get_stream_processor(input_stream_host, input_stream_port, output_stream_port, bs_data_prefix):
+def get_stream_processor(input_stream_host, input_stream_port, output_stream_port, epics_pv_name_prefix):
 
     def stream_processor(running_flag, roi_signal, roi_background, statistics):
         try:
             running_flag.set()
 
-            with source(host=input_stream_host, port=input_stream_port,
-                        queue_size=config.INPUT_STREAM_QUEUE_SIZE) as input_stream:
+            with source(host=input_stream_host, port=input_stream_port, mode=PULL,
+                        queue_size=config.INPUT_STREAM_QUEUE_SIZE,
+                        receive_timeout=config.INPUT_STREAM_RECEIVE_TIMEOUT) as input_stream:
 
                 with sender(port=output_stream_port) as output_stream:
 
                     statistics["processing_start_time"] = datetime.datetime.now()
+                    image_property_name = epics_pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE
+
+                    _logger.info("Using image property name '%s'.", image_property_name)
 
                     while running_flag.is_set():
 
@@ -38,11 +61,13 @@ def get_stream_processor(input_stream_host, input_stream_port, output_stream_por
 
                         _logger.debug("Received message with pulse_id %s", pulse_id)
 
-                        data = process_message(message, roi_signal, roi_background, bs_data_prefix)
+                        image = message.data.data[image_property_name].value
+
+                        processed_data = process_image(image, image_property_name, roi_signal, roi_background)
 
                         output_stream.send(pulse_id=pulse_id,
                                            timestamp=timestamp,
-                                           data=data)
+                                           data=processed_data)
 
                         _logger.debug("Sent message with pulse_id %s", pulse_id)
 
