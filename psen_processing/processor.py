@@ -80,8 +80,12 @@ def get_stream_processor(input_stream_host, input_stream_port, output_stream_por
             _logger.error("Error while processing the stream. Exiting. Error: ", e)
             running_flag.clear()
 
+            raise
+
         except KeyboardInterrupt:
             _logger.warning("Terminating processing due to user request.")
             running_flag.clear()
+
+            raise
 
     return stream_processor

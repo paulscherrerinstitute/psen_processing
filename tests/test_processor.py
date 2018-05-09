@@ -1,14 +1,17 @@
 import unittest
+from time import sleep
 
 import numpy
+from bsread.sender import sender
+from multiprocessing import Process, Event
+from bsread import source, PULL, json
 
-from psen_processing.processor import get_roi_x_profile, process_image
+from psen_processing import config
+from psen_processing.processor import get_roi_x_profile, process_image, get_stream_processor
 
 
 class TestProcessing(unittest.TestCase):
-
     def test_get_roi_x_profile(self):
-
         image = numpy.zeros(shape=(1024, 1024), dtype="uint16")
         image += 1
 
@@ -31,7 +34,6 @@ class TestProcessing(unittest.TestCase):
         self.assertListEqual(list(x_profile), [100] * 100)
 
     def test_process_image(self):
-
         image = numpy.zeros(shape=(1024, 1024), dtype="uint16")
         image += 1
 
@@ -61,5 +63,67 @@ class TestProcessing(unittest.TestCase):
         self.assertListEqual(list(processed_data[image_property_name + "_roi_background_x_profile"]), [100] * 100)
 
     def test_stream_processor(self):
-        # TODO: Implement.
-        pass
+        pv_name_prefix = "JUST_TESTING"
+        n_images = 5
+        original_roi_signal = [0, 1024, 0, 1024]
+        original_roi_background = [0, 100, 0, 100]
+
+        image = numpy.zeros(shape=(1024, 1024), dtype="uint16")
+        image += 1
+
+        data_to_send = {pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE: image}
+
+        def send_data():
+            with sender(port=10000) as output_stream:
+                for x in range(n_images):
+                    output_stream.send(data=data_to_send)
+
+        def process_data(event):
+            stream_processor = get_stream_processor(input_stream_host="localhost",
+                                                    input_stream_port=10000,
+                                                    output_stream_port=11000,
+                                                    epics_pv_name_prefix=pv_name_prefix)
+
+            stream_processor(event, original_roi_signal, original_roi_background, {})
+
+        running_event = Event()
+
+        send_process = Process(target=send_data)
+        processing_process = Process(target=process_data, args=(running_event,))
+
+        send_process.start()
+        processing_process.start()
+
+        final_data = []
+
+        with source(host="localhost", port=11000, mode=PULL, receive_timeout=1000) as input_stream:
+            for _ in range(n_images):
+                final_data.append(input_stream.receive())
+
+        running_event.clear()
+
+        sleep(0.2)
+
+        send_process.terminate()
+        processing_process.terminate()
+
+        self.assertEqual(len(final_data), n_images)
+
+        parameters = final_data[0].data.data[pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE +
+                                             "_processing_parameters"].value
+        processing_parameters = json.loads(parameters)
+
+        self.assertEqual(processing_parameters["roi_signal"], original_roi_signal)
+        self.assertEqual(processing_parameters["roi_background"], original_roi_background)
+
+        roi_signal = final_data[0].data.data[pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE +
+                                             "_roi_signal_x_profile"].value
+
+        self.assertEqual(len(roi_signal), 1024)
+        self.assertListEqual(list(roi_signal), [1024] * 1024)
+
+        roi_background = final_data[0].data.data[pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE +
+                                                 "_roi_background_x_profile"].value
+
+        self.assertEqual(len(roi_background), 100)
+        self.assertListEqual(list(roi_background), [100] * 100)
