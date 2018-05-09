@@ -5,6 +5,7 @@ from bsread import source, json, PULL
 from bsread.sender import sender
 
 from psen_processing import config
+from psen_processing.utils import append_message_data
 
 _logger = getLogger(__name__)
 
@@ -63,6 +64,8 @@ def get_stream_processor(input_stream_host, input_stream_port, output_stream_por
                         image = message.data.data[image_property_name].value
 
                         processed_data = process_image(image, image_property_name, roi_signal, roi_background)
+
+                        append_message_data(message=message, destination=processed_data)
 
                         output_stream.send(pulse_id=pulse_id,
                                            timestamp=timestamp,
