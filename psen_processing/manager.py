@@ -1,5 +1,9 @@
 class ProcessingManager(object):
 
+    def __init__(self, stream_processor, auto_start=False):
+        self.processor = stream_processor
+        self.auto_start = auto_start
+
     def start(self):
         pass
 
