@@ -55,11 +55,17 @@ class ProcessingManager(object):
         self.processing_thread = None
         self.running_flag = None
 
-    def set_roi(self, roi_index, roi_config):
+    def set_roi_background(self, roi_background):
         pass
 
-    def get_roi(self, roi_index=None):
+    def set_roi_signal(self, roi_signal):
         pass
+
+    def get_roi_background(self):
+        return self.roi_background
+
+    def get_roi_signal(self):
+        return self.roi_signal
 
     def get_statistics(self):
         pass
