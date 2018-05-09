@@ -1,6 +1,6 @@
 def validate_roi(roi):
     """
-    Check if the ROI parameters are valid.
+    Check if the ROI parameters are valid: List with 0 or 4 elements. Sizes at least 1, and offsets at least 0.
     :param roi: [offset_x, size_x, offset_y, size_y]
     :raises ValueError: When ROI is not valid, it raises a ValueError.
     """
@@ -22,6 +22,11 @@ def validate_roi(roi):
 
 
 def get_host_port_from_stream_address(stream_address):
+    """
+    Convert hostname in format tcp://127.0.0.1:8080 to host (127.0.0.1) and port (8080)
+    :param stream_address: String in format tcp://XXX:XXX
+    :return: String with hostname, int with port.
+    """
     source_host, source_port = stream_address.rsplit(":", maxsplit=1)
     source_host = source_host.split("//")[1]
 
