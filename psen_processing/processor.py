@@ -44,7 +44,7 @@ def get_stream_processor(input_stream_host, input_stream_port, output_stream_por
 
                 with sender(port=output_stream_port) as output_stream:
 
-                    statistics["processing_start_time"] = datetime.datetime.now()
+                    statistics["processing_start_time"] = str(datetime.datetime.now())
                     image_property_name = epics_pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE
 
                     _logger.info("Using image property name '%s'.", image_property_name)
@@ -74,7 +74,8 @@ def get_stream_processor(input_stream_host, input_stream_port, output_stream_por
                         _logger.debug("Sent message with pulse_id %s", pulse_id)
 
                         statistics["last_sent_pulse_id"] = pulse_id
-                        statistics["last_sent_time"] = datetime.datetime.now()
+                        statistics["last_sent_time"] = str(datetime.datetime.now())
+                        statistics["n_processed_images"] = statistics.get("n_processed_images", 0) + 1
 
         except Exception as e:
             _logger.error("Error while processing the stream. Exiting. Error: ", e)

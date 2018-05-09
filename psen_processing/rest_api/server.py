@@ -49,8 +49,7 @@ def register_rest_interface(app, instance_manager):
 
         return {"state": "ok",
                 "status": instance_manager.get_status(),
-                "roi_background": instance_manager.get_roi_background(),
-                "roi_signal": instance_manager.get_roi_signal()}
+                "roi_background": instance_manager.get_roi_background()}
 
     @app.get(api_root_address + "/roi_signal")
     def get_roi_signal():
@@ -66,7 +65,6 @@ def register_rest_interface(app, instance_manager):
 
         return {"state": "ok",
                 "status": instance_manager.get_status(),
-                "roi_background": instance_manager.get_roi_background(),
                 "roi_signal": instance_manager.get_roi_signal()}
 
     @app.get(api_root_address + "/statistics")

@@ -28,81 +28,81 @@ class PsenProcessingClient(object):
     def start(self):
         """
         Start the processing.
-        :return: Response from server.
+        :return: Server status.
         """
         rest_endpoint = "/start"
 
         server_response = requests.post(self.api_address_format % rest_endpoint).json()
-        return validate_response(server_response)
+        return validate_response(server_response)["status"]
 
     def stop(self):
         """
         Stop the processing.
-        :return: Response from server.
+        :return: Server status.
         """
         rest_endpoint = "/stop"
 
         server_response = requests.post(self.api_address_format % rest_endpoint).json()
-        return validate_response(server_response)
+        return validate_response(server_response)["status"]
 
     def get_status(self):
         """
         Get the status of the processing.
-        :return: Response from server.
+        :return: Server status.
         """
         rest_endpoint = "/status"
 
         server_response = requests.get(self.api_address_format % rest_endpoint).json()
-        return validate_response(server_response)
+        return validate_response(server_response)["status"]
 
     def get_statistics(self):
         """
         Get the statistics of the processing.
-        :return: Response from server.
+        :return: Server statistics.
         """
         rest_endpoint = "/statistics"
 
         server_response = requests.get(self.api_address_format % rest_endpoint).json()
-        return validate_response(server_response)
+        return validate_response(server_response)["statistics"]
 
     def get_roi_signal(self):
         """
         Get the ROI for the signal.
-        :return: Response from server.
+        :return: Signal ROI as a list.
         """
         rest_endpoint = "/roi_signal"
 
         server_response = requests.get(self.api_address_format % rest_endpoint).json()
-        return validate_response(server_response)
+        return validate_response(server_response)["roi_signal"]
 
     def set_roi_signal(self, roi):
         """
         Set the ROI for the signal.
         :param roi: List of 4 elements: [offset_x, size_x, offset_y, size_y] or [] or None.
-        :return: Response from server.
+        :return: Signal ROI as a list.
         """
         rest_endpoint = "/roi_signal"
 
         server_response = requests.post(self.api_address_format % rest_endpoint, json=roi).json()
-        return validate_response(server_response)
+        return validate_response(server_response)["roi_signal"]
 
     def get_roi_background(self):
         """
         Get the ROI for the background.
-        :return: Response from server.
+        :return: Background ROI as a list.
         """
         rest_endpoint = "/roi_background"
 
         server_response = requests.get(self.api_address_format % rest_endpoint).json()
-        return validate_response(server_response)
+        return validate_response(server_response)["roi_background"]
 
     def set_roi_background(self, roi):
         """
         Set the ROI for the background.
         :param roi: List of 4 elements: [offset_x, size_x, offset_y, size_y] or [] or None.
-        :return: Response from server.
+        :return: Background ROI as a list.
         """
         rest_endpoint = "/roi_background"
 
         server_response = requests.post(self.api_address_format % rest_endpoint, json=roi).json()
-        return validate_response(server_response)
+        return validate_response(server_response)["roi_background"]

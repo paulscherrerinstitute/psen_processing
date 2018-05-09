@@ -26,7 +26,8 @@ def start_processing(input_stream, output_stream_port, rest_api_interface, rest_
                                             epics_pv_name_prefix=epics_pv_name_prefix)
 
     _logger.info("Auto start set to %s.", auto_start)
-    manager = ProcessingManager(stream_processor, auto_start)
+    manager = ProcessingManager(stream_processor=stream_processor,
+                                auto_start=auto_start)
 
     app = bottle.Bottle()
 
