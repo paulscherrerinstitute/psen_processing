@@ -27,6 +27,8 @@ class TestProcessingManager(unittest.TestCase):
 
                 sleep(0.01)
 
+        manager = None
+
         try:
             manager = ProcessingManager(processor, auto_start=False)
 
@@ -53,7 +55,9 @@ class TestProcessingManager(unittest.TestCase):
             self.assertGreater(manager.get_statistics()["counter"], 0)
 
         except:
-            manager.stop()
+            if manager:
+                manager.stop()
+
             raise
 
     def test_exception_when_starting(self):

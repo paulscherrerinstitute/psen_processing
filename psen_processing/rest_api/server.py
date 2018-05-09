@@ -29,17 +29,17 @@ def register_rest_interface(app, instance_manager):
         return {"state": "ok",
                 "status": instance_manager.get_status()}
 
+    @app.get(api_root_address + "/status")
     def get_status():
         return {"state": "ok",
                 "status": instance_manager.get_status()}
 
-    @app.get(api_root_address + "/roi")
-    def get_roi():
+    @app.get(api_root_address + "/roi_background")
+    def get_roi_background():
 
         return {"state": "ok",
                 "status": instance_manager.get_status(),
-                "roi_background": instance_manager.get_roi_background(),
-                "roi_signal": instance_manager.get_roi_signal()}
+                "roi_background": instance_manager.get_roi_background()}
 
     @app.post(api_root_address + "/roi_background")
     def set_roi_background():
@@ -50,6 +50,12 @@ def register_rest_interface(app, instance_manager):
         return {"state": "ok",
                 "status": instance_manager.get_status(),
                 "roi_background": instance_manager.get_roi_background(),
+                "roi_signal": instance_manager.get_roi_signal()}
+
+    @app.get(api_root_address + "/roi_signal")
+    def get_roi_signal():
+        return {"state": "ok",
+                "status": instance_manager.get_status(),
                 "roi_signal": instance_manager.get_roi_signal()}
 
     @app.post(api_root_address + "/roi_signal")
