@@ -2,6 +2,8 @@ from threading import Event, Thread
 
 from logging import getLogger
 
+from copy import deepcopy
+
 from psen_processing import config
 from psen_processing.utils import validate_roi
 
@@ -16,11 +18,11 @@ class ProcessingManager(object):
         self.auto_start = auto_start
 
         if roi_background is None:
-            roi_background = config.DEFAULT_ROI_BACKGROUND
+            roi_background = config.DEFAULT_ROI_BACKGROUND or []
         self.roi_background = roi_background
 
         if roi_signal is None:
-            roi_signal = config.DEFAULT_ROI_SIGNAL
+            roi_signal = config.DEFAULT_ROI_SIGNAL or []
         self.roi_signal = roi_signal
 
         self.processing_thread = None
@@ -60,19 +62,23 @@ class ProcessingManager(object):
 
     def set_roi_background(self, roi_background):
 
-        if roi_background is not None:
+        if roi_background:
             validate_roi(roi_background)
 
         _logger.info("Setting ROI background to %s.", roi_background)
-        self.roi_background = roi_background
+
+        self.roi_background.clear()
+        self.roi_background.extend(roi_background)
 
     def set_roi_signal(self, roi_signal):
 
-        if roi_signal is not None:
+        if roi_signal:
             validate_roi(roi_signal)
 
         _logger.info("Setting ROI signal to %s.", roi_signal)
-        self.roi_signal = roi_signal
+
+        self.roi_signal.clear()
+        self.roi_signal.extend(roi_signal)
 
     def get_roi_background(self):
         return self.roi_background
@@ -81,7 +87,7 @@ class ProcessingManager(object):
         return self.roi_signal
 
     def get_statistics(self):
-        return self.statistics
+        return deepcopy(self.statistics)
 
     def _is_running(self):
         return self.processing_thread and self.processing_thread.is_alive()
