@@ -5,5 +5,6 @@ setup(name="psen_processing",
       author="Paul Scherrer Institute",
       description="PSEN image processing.",
       license="GPL3",
-      packages=['psen_processing'],
+      packages=['psen_processing',
+                'psen_processing.rest_api'],
       )
