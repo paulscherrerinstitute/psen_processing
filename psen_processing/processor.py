@@ -5,7 +5,7 @@ _logger = getLogger(__name__)
 
 def get_stream_processor(input_stream, output_stream_port, bs_data_prefix):
 
-    def stream_processor(running_flag, roi_signal, roi_background):
+    def stream_processor(running_flag, roi_signal, roi_background, statistics):
         try:
             # TODO: Connect to the stream, open output stream.
 

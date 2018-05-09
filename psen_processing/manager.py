@@ -26,6 +26,8 @@ class ProcessingManager(object):
         self.processing_thread = None
         self.running_flag = None
 
+        self.statistics = {}
+
         if auto_start:
             self.start()
 
@@ -38,7 +40,7 @@ class ProcessingManager(object):
         self.running_flag = Event()
 
         self.processing_thread = Thread(target=self.stream_processor,
-                                        args=(self.running_flag, self.roi_signal, self.roi_background))
+                                        args=(self.running_flag, self.roi_signal, self.roi_background, self.statistics))
 
         self.processing_thread.start()
 
@@ -79,7 +81,7 @@ class ProcessingManager(object):
         return self.roi_signal
 
     def get_statistics(self):
-        pass
+        return self.statistics
 
     def _is_running(self):
         return self.processing_thread and self.processing_thread.is_alive()
