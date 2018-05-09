@@ -16,6 +16,7 @@ requirements:
         - python
         - bottle
         - bsread
+        - requests
 
 build:
   entry_points:
