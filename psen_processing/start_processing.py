@@ -2,12 +2,12 @@ import argparse
 import logging
 
 import bottle
-from cam_server.utils import get_host_port_from_stream_address
 
 from psen_processing import config
 from psen_processing.manager import ProcessingManager
 from psen_processing.processor import get_stream_processor
 from psen_processing.rest_api.server import register_rest_interface
+from psen_processing.utils import get_host_port_from_stream_address
 
 _logger = logging.getLogger(__name__)
 

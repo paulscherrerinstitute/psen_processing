@@ -3,7 +3,6 @@ from logging import getLogger
 
 from bsread import source, json, PULL
 from bsread.sender import sender
-from cam_server.pipeline.data_processing import functions
 
 from psen_processing import config
 
@@ -12,7 +11,7 @@ _logger = getLogger(__name__)
 
 def get_roi_x_profile(image, roi):
     offset_x, size_x, offset_y, size_y = roi
-    roi_image = functions.get_region_of_interest(image, offset_x, size_x, offset_y, size_y)
+    roi_image = image[offset_y:offset_y + size_y, offset_x:offset_x + size_x]
 
     return roi_image.sum(0)
 

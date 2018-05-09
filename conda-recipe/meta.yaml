@@ -15,7 +15,6 @@ requirements:
     run:
         - python
         - bottle
-        - cam_server
         - bsread
 
 build:
