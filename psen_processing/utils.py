@@ -6,7 +6,10 @@ def validate_roi(roi):
     """
 
     if not isinstance(roi, list):
-        raise ValueError("ROI must be an instance of a list, but %s was given as a %s." % roi, type(roi))
+        raise ValueError("ROI must be an instance of a list, but %s was given as a %s." % (roi, type(roi)))
+
+    if len(roi) == 0:
+        return
 
     if len(roi) != 4:
         raise ValueError("ROI must have exactly 4 elements, but %s was given." % roi)

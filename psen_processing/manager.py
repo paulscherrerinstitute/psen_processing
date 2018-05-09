@@ -62,8 +62,10 @@ class ProcessingManager(object):
 
     def set_roi_background(self, roi_background):
 
-        if roi_background:
-            validate_roi(roi_background)
+        if not roi_background:
+            roi_background = []
+
+        validate_roi(roi_background)
 
         _logger.info("Setting ROI background to %s.", roi_background)
 
@@ -72,8 +74,10 @@ class ProcessingManager(object):
 
     def set_roi_signal(self, roi_signal):
 
-        if roi_signal:
-            validate_roi(roi_signal)
+        if not roi_signal:
+            roi_signal = []
+
+        validate_roi(roi_signal)
 
         _logger.info("Setting ROI signal to %s.", roi_signal)
 

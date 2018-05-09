@@ -72,7 +72,6 @@ class TestProcessingManager(unittest.TestCase):
 
         self.assertEqual(manager.get_status(), "stopped")
 
-
     def test_validate_roi(self):
 
         with self.assertRaisesRegex(ValueError, "ROI offsets"):
@@ -82,3 +81,8 @@ class TestProcessingManager(unittest.TestCase):
             validate_roi([0, 1, 0, 0])
 
         validate_roi([0, 1, 0, 1])
+
+        validate_roi([])
+
+        with self.assertRaisesRegex(ValueError, "ROI must be an instance of a list"):
+            validate_roi(None)

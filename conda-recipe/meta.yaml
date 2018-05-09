@@ -16,6 +16,7 @@ requirements:
         - python
         - bottle
         - cam_server
+        - bsread
 
 build:
   entry_points:
