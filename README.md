@@ -24,7 +24,7 @@ All request return a JSON with the following fields:
 - **status** - \["stopped", "processing"\]
 - Optional request specific field - \["roi_background", "roi_signal", "statistics"]
 
-Endpoints:
+**Endpoints**:
 
 * `POST localhost:10000/start` - Start the processing of images.
 
