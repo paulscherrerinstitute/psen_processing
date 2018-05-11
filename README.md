@@ -3,6 +3,20 @@
 # PSEN Processing
 This library is meant to be a stream device for processing images from PSEN cameras.
 
+## Overview
+This service takes the input stream from a camera, applies 2 ROIs (region of interest) to the image 
+(signal and background) and calculates the X profile for both ROIs. It then sends this calculated data 
+together with the input stream data to the output stream.
+
+There are 2 ROIs you can set:
+- Signal ROI.
+- Background ROI.
+
+They do exactly the same calculation (X profile of the given ROI) but are named differently to make it easier to 
+distinguish them. If one of the ROI is not set, the X profile for this ROI will not be present in the output stream.
+
+In addition to the X profiles, the processing parameters (both ROI values) are also added to the output stream.
+
 ## REST Api
 In the API description, localhost and port 10000 are assumed. Please change this for your specific case.
 
@@ -99,6 +113,35 @@ class PsenProcessingClient(builtins.object)
         Stop the processing.
         :return: Server status.
 ```
+
+## Output stream
+All the parameters in the input stream are always passed on to the output stream. Some new parameters are added.
+
+The names of the new parameters in the output stream are dependent on the names of the parameters in the input stream.
+The prefix of parameters in the input stream are specified with the **--prefix** argument when running the server.
+
+For this example let's assume that we use **--prefix SLAAR21-LCAM-C561**.
+
+In this case, the server will look for the image in the **SLAAR21-LCAM-C561:FPICTURE** parameter.
+
+This means that the output stream will have this additional parameters:
+- SLAAR21-LCAM-C561:FPICTURE_processing_parameters (Parameters used for processing the image)
+- SLAAR21-LCAM-C561:FPICTURE_roi_signal_x_profile (X profile of signal ROI)
+- SLAAR21-LCAM-C561:FPICTURE_roi_background_x_profile (X profile of background ROI)
+
+The **\_processing\_parameters** is always present in the output stream.
+
+The **\_roi\_signal\_x\_profile** and **\_roi\_background\_x\_profile** will be present in the output stream only 
+if their corresponding ROI is set and valid.
+
+### Processing parameters format
+The processing parameters are passed to the output stream as a JSON string. Example:
+```bash
+SLAAR21-LCAM-C561:FPICTURE_processing_parameters = '{"roi_signal": [0, 100, 0, 100], "roi_background": [100, 200, 100, 200]}'
+```
+
+The ROIs are in the same format as you set them:
+- **\[offset_x, size_x, offset_y, size_y\]**
 
 
 ## Conda setup
