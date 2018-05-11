@@ -18,7 +18,7 @@ distinguish them. If one of the ROI is not set, the X profile for this ROI will 
 In addition to the X profiles, the processing parameters (both ROI values) are also added to the output stream.
 
 ## REST Api
-In the API description, localhost and port 10000 are assumed. Please change this for your specific case.
+In the API description, localhost and port 11000 are assumed. Please change this for your specific case.
 
 ### ROI format
 Both ROIs (background, signal) are defined in the following format:
@@ -40,25 +40,25 @@ All request return a JSON with the following fields:
 
 **Endpoints**:
 
-* `POST localhost:10000/start` - Start the processing of images.
+* `POST localhost:11000/start` - Start the processing of images.
 
-* `POST localhost:10000/stop` - Stop the processing of images.
+* `POST localhost:11000/stop` - Stop the processing of images.
 
-* `GET localhost:10000/status` - Get the status of the processing.
+* `GET localhost:11000/status` - Get the status of the processing.
 
-* `GET localhost:10000/roi_background` - Get the currently set background ROI.
+* `GET localhost:11000/roi_background` - Get the currently set background ROI.
     - Response specific field: "roi_background" - ROI for the background.
     
-* `POST localhost:10000/roi_background` - Set background ROI.
+* `POST localhost:11000/roi_background` - Set background ROI.
     - Response specific field: "roi_background" - ROI for the background.
     
-* `GET localhost:10000/roi_signal` - Get the currently set signal ROI.
+* `GET localhost:11000/roi_signal` - Get the currently set signal ROI.
     - Response specific field: "roi_signal" - ROI for the signal.
     
-* `POST localhost:10000/roi_signal` - Set signal ROI.
+* `POST localhost:11000/roi_signal` - Set signal ROI.
     - Response specific field: "roi_signal" - ROI for the signal.
 
-* `GET localhost:10000/statistics` - get process statistics.
+* `GET localhost:11000/statistics` - get process statistics.
     - Response specific field: "statistics" - Data about the processing.
     
 ### Python client
@@ -66,15 +66,15 @@ The rest API is also wrapped in a Python client. To use it:
 ```python
 
 from psen_processing import PsenProcessingClient
-client = PsenProcessingClient(address="http://sf-daqsync-02:10000/")
+client = PsenProcessingClient(address="http://sf-daqsync-02:11000/")
 ```
 
 Class definition:
 ```
 class PsenProcessingClient(builtins.object)
 
-    __init__(self, address='http://sf-daqsync-02:10000/')
-        :param address: Address of the PSEN Processing service, e.g. http://localhost:10000
+    __init__(self, address='http://sf-daqsync-02:11000/')
+        :param address: Address of the PSEN Processing service, e.g. http://localhost:11000
   
     get_address(self)
         Return the REST api endpoint address.
