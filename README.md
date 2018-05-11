@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/datastreaming/frontend_digitizers_calibration.svg?branch=master)](https://travis-ci.org/datastreaming/frontend_digitizers_calibration) [![Build status](https://ci.appveyor.com/api/projects/status/tigeg1p1wi90aruy?svg=true)](https://ci.appveyor.com/project/Babicaa/frontend-digitizers-calibration)
+[![Build Status](https://travis-ci.org/paulscherrerinstitute/psen_processing.svg?branch=master)](https://travis-ci.org/paulscherrerinstitute/psen_processing)
 
 # PSEN Processing
 This library is meant to be a stream device for processing images from PSEN cameras.
@@ -24,6 +24,7 @@ All request return a JSON with the following fields:
 - **status** - \["stopped", "processing"\]
 - Optional request specific field - \["roi_background", "roi_signal", "statistics"]
 
+Endpoints:
 
 * `POST localhost:10000/start` - Start the processing of images.
 
@@ -57,8 +58,7 @@ client = PsenProcessingClient(address="http://sf-daqsync-02:10000/")
 Class definition:
 ```
 class PsenProcessingClient(builtins.object)
-    Methods defined here:
-  
+
     __init__(self, address='http://sf-daqsync-02:10000/')
         :param address: Address of the PSEN Processing service, e.g. http://localhost:10000
   
