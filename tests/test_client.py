@@ -147,3 +147,32 @@ class TestClient(unittest.TestCase):
 
         self.assertListEqual(roi_signal, start_processing_parameters["roi_signal"])
         self.assertListEqual(updated_roi_signal, end_processing_parameters["roi_signal"])
+
+    def test_no_roi(self):
+        client = PsenProcessingClient("http://localhost:10000/")
+
+        roi_signal = []
+        client.set_roi_signal(roi_signal)
+
+        roi_background = None
+        client.set_roi_background(roi_background)
+
+        client.start()
+
+        processed_data = []
+
+        with source(host="localhost", port=12000, mode=PULL, receive_timeout=1000) as input_stream:
+            for index in range(self.n_images):
+                processed_data.append(input_stream.receive())
+
+        client.stop()
+
+        roi_signal_parameter_name = self.pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE + "_roi_signal_x_profile"
+        roi_background_parameter_name = self.pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE + "_roi_background_x_profile"
+
+        # All the messages should be equal.
+        received_data = processed_data[0]
+
+        # If the roi is not set, the value should not be added to the output.
+        self.assertTrue(roi_signal_parameter_name not in received_data.data.data)
+        self.assertTrue(roi_background_parameter_name not in received_data.data.data)
