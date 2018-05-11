@@ -136,8 +136,9 @@ if their corresponding ROI is set and valid.
 
 ### Processing parameters format
 The processing parameters are passed to the output stream as a JSON string. Example:
-```bash
-SLAAR21-LCAM-C561:FPICTURE_processing_parameters = '{"roi_signal": [0, 100, 0, 100], "roi_background": [100, 200, 100, 200]}'
+```
+SLAAR21-LCAM-C561:FPICTURE_processing_parameters = 
+'{"roi_signal": [0, 100, 0, 100], "roi_background": [100, 200, 100, 200]}'
 ```
 
 The ROIs are in the same format as you set them:
