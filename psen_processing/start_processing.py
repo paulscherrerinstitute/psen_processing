@@ -42,9 +42,9 @@ def start_processing(input_stream, output_stream_port, rest_api_interface, rest_
 
 def main():
     parser = argparse.ArgumentParser(description='PSEN camera processing.')
-    parser.add_argument('-i', '--input_stream', help="Input bsread stream to process.")
-    parser.add_argument('-p', '--prefix', help="Epics PV prefix of the image.")
-    parser.add_argument('-o', '--output_stream_port', default=config.DEFAULT_OUTPUT_STREAM_PORT,
+    parser.add_argument('input_stream', help="Input bsread stream to process.")
+    parser.add_argument('prefix', help="Epics PV prefix of the image.")
+    parser.add_argument('-o', '--output_stream_port', type=int, default=config.DEFAULT_OUTPUT_STREAM_PORT,
                         help="Output bsread stream port.")
     parser.add_argument('-r', '--rest_api_port', default=config.DEFAULT_REST_API_PORT, help="REST Api port.")
     parser.add_argument('--rest_api_interface', default=config.DEFAULT_REST_API_INTERFACE,
