@@ -1,7 +1,7 @@
 from setuptools import setup
 
 setup(name="psen_processing",
-      version="1.0.2",
+      version="1.0.3",
       author="Paul Scherrer Institute",
       description="PSEN image processing.",
       license="GPL3",
