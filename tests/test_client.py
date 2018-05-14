@@ -179,3 +179,21 @@ class TestClient(unittest.TestCase):
         # If the roi is not set, the value should not be added to the output.
         self.assertTrue(roi_signal_parameter_name not in received_data.data.data)
         self.assertTrue(roi_background_parameter_name not in received_data.data.data)
+
+    def test_stop_when_blocking_send(self):
+        client = PsenProcessingClient("http://localhost:10000/")
+
+        client.start()
+
+        def stop_client():
+            client = PsenProcessingClient("http://localhost:10000/")
+            client.stop()
+
+        stop_process = Process(target=stop_client)
+        stop_process.start()
+
+        sleep(0.5)
+
+        if stop_process.is_alive() and not stop_process.join(timeout=3):
+            stop_process.terminate()
+            raise ValueError("The stop call is blocked.")
