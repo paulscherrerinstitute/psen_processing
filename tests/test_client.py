@@ -197,3 +197,21 @@ class TestClient(unittest.TestCase):
         if stop_process.is_alive() and not stop_process.join(timeout=3):
             stop_process.terminate()
             raise ValueError("The stop call is blocked.")
+
+    def test_received_data_on_send_timeout(self):
+        client = PsenProcessingClient("http://localhost:10000/")
+        client.start()
+
+        processed_data = []
+
+        with source(host="localhost", port=12000, mode=PULL, receive_timeout=1000) as input_stream:
+            for index in range(self.n_images):
+
+                if index == 2:
+                    # Wait for the send timeout to happen.
+                    sleep(config.OUTPUT_STREAM_SEND_TIMEOUT + 1)
+
+                processed_data.append(input_stream.receive())
+
+        for index, data in enumerate(processed_data):
+            self.assertEqual(data.data.pulse_id, index)

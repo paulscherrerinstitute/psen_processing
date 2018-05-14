@@ -3,6 +3,7 @@ from logging import getLogger
 
 from bsread import source, json, PULL
 from bsread.sender import sender
+from zmq import Again
 
 from psen_processing import config
 from psen_processing.utils import append_message_data
@@ -47,7 +48,7 @@ def get_stream_processor(input_stream_host, input_stream_port, output_stream_por
                         queue_size=config.INPUT_STREAM_QUEUE_SIZE,
                         receive_timeout=config.INPUT_STREAM_RECEIVE_TIMEOUT) as input_stream:
 
-                with sender(port=output_stream_port) as output_stream:
+                with sender(port=output_stream_port, send_timeout=config.OUTPUT_STREAM_SEND_TIMEOUT) as output_stream:
 
                     statistics["processing_start_time"] = str(datetime.datetime.now())
                     statistics["last_sent_pulse_id"] = None
@@ -76,15 +77,24 @@ def get_stream_processor(input_stream_host, input_stream_port, output_stream_por
 
                         append_message_data(message=message, destination=processed_data)
 
-                        output_stream.send(pulse_id=pulse_id,
-                                           timestamp=timestamp,
-                                           data=processed_data)
+                        # The send method raises Again if there is no consumer and the output queue is full.
+                        # Continue trying to send the message until a client connects or the running flag is cleared.
+                        while running_flag.is_set():
+                            try:
+                                output_stream.send(pulse_id=pulse_id,
+                                                   timestamp=timestamp,
+                                                   data=processed_data)
 
-                        _logger.debug("Sent message with pulse_id %s", pulse_id)
+                                _logger.debug("Sent message with pulse_id %s", pulse_id)
 
-                        statistics["last_sent_pulse_id"] = pulse_id
-                        statistics["last_sent_time"] = str(datetime.datetime.now())
-                        statistics["n_processed_images"] = statistics.get("n_processed_images", 0) + 1
+                                statistics["last_sent_pulse_id"] = pulse_id
+                                statistics["last_sent_time"] = str(datetime.datetime.now())
+                                statistics["n_processed_images"] = statistics.get("n_processed_images", 0) + 1
+
+                                break
+
+                            except Again:
+                                continue
 
         except Exception as e:
             _logger.error("Error while processing the stream. Exiting. Error: ", e)

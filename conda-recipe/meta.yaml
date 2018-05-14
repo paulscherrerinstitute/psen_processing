@@ -15,7 +15,7 @@ requirements:
     run:
         - python
         - bottle
-        - bsread
+        - bsread >=1.2.0
         - requests
 
 build:
