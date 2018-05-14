@@ -79,8 +79,11 @@ class TestClient(unittest.TestCase):
         self.assertEqual(client.get_status(), "processing")
 
         statistics = client.get_statistics()
-        self.assertEqual(len(statistics), 1)
+        self.assertEqual(len(statistics), 4)
         self.assertTrue("processing_start_time" in statistics)
+        self.assertTrue("last_sent_pulse_id" in statistics)
+        self.assertTrue("last_sent_time" in statistics)
+        self.assertTrue("n_processed_images" in statistics)
 
         processed_data = []
 

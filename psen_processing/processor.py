@@ -38,6 +38,11 @@ def get_stream_processor(input_stream_host, input_stream_port, output_stream_por
         try:
             running_flag.set()
 
+            _logger.info("Connecting to input_stream_host %s and input_stream_port %s.",
+                         input_stream_host, input_stream_port)
+
+            _logger.info("Sending out data on stream port %s.", output_stream_port)
+
             with source(host=input_stream_host, port=input_stream_port, mode=PULL,
                         queue_size=config.INPUT_STREAM_QUEUE_SIZE,
                         receive_timeout=config.INPUT_STREAM_RECEIVE_TIMEOUT) as input_stream:
@@ -45,6 +50,10 @@ def get_stream_processor(input_stream_host, input_stream_port, output_stream_por
                 with sender(port=output_stream_port) as output_stream:
 
                     statistics["processing_start_time"] = str(datetime.datetime.now())
+                    statistics["last_sent_pulse_id"] = None
+                    statistics["last_sent_time"] = None
+                    statistics["n_processed_images"] = 0
+
                     image_property_name = epics_pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE
 
                     _logger.info("Using image property name '%s'.", image_property_name)
