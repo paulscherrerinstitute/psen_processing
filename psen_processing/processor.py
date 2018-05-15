@@ -21,14 +21,14 @@ def get_roi_x_profile(image, roi):
 def process_image(image, image_property_name, roi_signal, roi_background):
     processed_data = dict()
 
-    processed_data[image_property_name + "_processing_parameters"] = json.dumps({"roi_signal": roi_signal,
+    processed_data[image_property_name + ".processing_parameters"] = json.dumps({"roi_signal": roi_signal,
                                                                                  "roi_background": roi_background})
 
     if roi_signal:
-        processed_data[image_property_name + "_roi_signal_x_profile"] = get_roi_x_profile(image, roi_signal)
+        processed_data[image_property_name + ".roi_signal_x_profile"] = get_roi_x_profile(image, roi_signal)
 
     if roi_background:
-        processed_data[image_property_name + "_roi_background_x_profile"] = get_roi_x_profile(image, roi_background)
+        processed_data[image_property_name + ".roi_background_x_profile"] = get_roi_x_profile(image, roi_background)
 
     return processed_data
 

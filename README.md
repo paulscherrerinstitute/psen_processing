@@ -125,19 +125,19 @@ For this example let's assume that we use **--prefix SLAAR21-LCAM-C561**.
 In this case, the server will look for the image in the **SLAAR21-LCAM-C561:FPICTURE** parameter.
 
 This means that the output stream will have this additional parameters:
-- SLAAR21-LCAM-C561:FPICTURE_processing_parameters (Parameters used for processing the image)
-- SLAAR21-LCAM-C561:FPICTURE_roi_signal_x_profile (X profile of signal ROI)
-- SLAAR21-LCAM-C561:FPICTURE_roi_background_x_profile (X profile of background ROI)
+- SLAAR21-LCAM-C561:FPICTURE.processing_parameters (Parameters used for processing the image)
+- SLAAR21-LCAM-C561:FPICTURE.roi_signal_x_profile (X profile of signal ROI)
+- SLAAR21-LCAM-C561:FPICTURE.roi_background_x_profile (X profile of background ROI)
 
-The **\_processing\_parameters** is always present in the output stream.
+The **\.processing\_parameters** is always present in the output stream.
 
-The **\_roi\_signal\_x\_profile** and **\_roi\_background\_x\_profile** will be present in the output stream only 
+The **\.roi\_signal\_x\_profile** and **\.roi\_background\_x\_profile** will be present in the output stream only 
 if their corresponding ROI is set and valid.
 
 ### Processing parameters format
 The processing parameters are passed to the output stream as a JSON string. Example:
 ```
-SLAAR21-LCAM-C561:FPICTURE_processing_parameters = 
+SLAAR21-LCAM-C561:FPICTURE.processing_parameters = 
 '{"roi_signal": [0, 100, 0, 100], "roi_background": [100, 200, 100, 200]}'
 ```
 

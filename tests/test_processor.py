@@ -44,23 +44,23 @@ class TestProcessing(unittest.TestCase):
 
         processed_data = process_image(image, image_property_name, roi_signal, roi_background)
 
-        self.assertSetEqual(set(processed_data.keys()), {image_property_name + "_processing_parameters",
-                                                         image_property_name + "_roi_signal_x_profile"})
+        self.assertSetEqual(set(processed_data.keys()), {image_property_name + ".processing_parameters",
+                                                         image_property_name + ".roi_signal_x_profile"})
 
         roi_signal = [0, 1024, 0, 1024]
         roi_background = [0, 100, 0, 100]
 
         processed_data = process_image(image, image_property_name, roi_signal, roi_background)
 
-        self.assertSetEqual(set(processed_data.keys()), {image_property_name + "_processing_parameters",
-                                                         image_property_name + "_roi_signal_x_profile",
-                                                         image_property_name + "_roi_background_x_profile"})
+        self.assertSetEqual(set(processed_data.keys()), {image_property_name + ".processing_parameters",
+                                                         image_property_name + ".roi_signal_x_profile",
+                                                         image_property_name + ".roi_background_x_profile"})
 
-        self.assertEqual(len(processed_data[image_property_name + "_roi_signal_x_profile"]), 1024)
-        self.assertListEqual(list(processed_data[image_property_name + "_roi_signal_x_profile"]), [1024] * 1024)
+        self.assertEqual(len(processed_data[image_property_name + ".roi_signal_x_profile"]), 1024)
+        self.assertListEqual(list(processed_data[image_property_name + ".roi_signal_x_profile"]), [1024] * 1024)
 
-        self.assertEqual(len(processed_data[image_property_name + "_roi_background_x_profile"]), 100)
-        self.assertListEqual(list(processed_data[image_property_name + "_roi_background_x_profile"]), [100] * 100)
+        self.assertEqual(len(processed_data[image_property_name + ".roi_background_x_profile"]), 100)
+        self.assertListEqual(list(processed_data[image_property_name + ".roi_background_x_profile"]), [100] * 100)
 
     def test_stream_processor(self):
         pv_name_prefix = "JUST_TESTING"
@@ -110,20 +110,20 @@ class TestProcessing(unittest.TestCase):
         self.assertEqual(len(final_data), n_images)
 
         parameters = final_data[0].data.data[pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE +
-                                             "_processing_parameters"].value
+                                             ".processing_parameters"].value
         processing_parameters = json.loads(parameters)
 
         self.assertEqual(processing_parameters["roi_signal"], original_roi_signal)
         self.assertEqual(processing_parameters["roi_background"], original_roi_background)
 
         roi_signal = final_data[0].data.data[pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE +
-                                             "_roi_signal_x_profile"].value
+                                             ".roi_signal_x_profile"].value
 
         self.assertEqual(len(roi_signal), 1024)
         self.assertListEqual(list(roi_signal), [1024] * 1024)
 
         roi_background = final_data[0].data.data[pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE +
-                                                 "_roi_background_x_profile"].value
+                                                 ".roi_background_x_profile"].value
 
         self.assertEqual(len(roi_background), 100)
         self.assertListEqual(list(roi_background), [100] * 100)

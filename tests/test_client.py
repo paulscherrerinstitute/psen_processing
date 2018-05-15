@@ -143,7 +143,7 @@ class TestClient(unittest.TestCase):
 
         client.stop()
 
-        processing_parameters_name = self.pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE + "_processing_parameters"
+        processing_parameters_name = self.pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE + ".processing_parameters"
 
         start_processing_parameters = json.loads(processed_data[0].data.data[processing_parameters_name].value)
         end_processing_parameters = json.loads(processed_data[9].data.data[processing_parameters_name].value)
@@ -170,8 +170,8 @@ class TestClient(unittest.TestCase):
 
         client.stop()
 
-        roi_signal_parameter_name = self.pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE + "_roi_signal_x_profile"
-        roi_background_parameter_name = self.pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE + "_roi_background_x_profile"
+        roi_signal_parameter_name = self.pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE + ".roi_signal_x_profile"
+        roi_background_parameter_name = self.pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE + ".roi_background_x_profile"
 
         # All the messages should be equal.
         received_data = processed_data[0]
