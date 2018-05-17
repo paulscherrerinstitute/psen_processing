@@ -75,7 +75,7 @@ def get_stream_processor(input_stream_host, input_stream_port, output_stream_por
 
                         processed_data = process_image(image, image_property_name, roi_signal, roi_background)
 
-                        append_message_data(message=message, destination=processed_data)
+                        # append_message_data(message=message, destination=processed_data)
 
                         # The send method raises Again if there is no consumer and the output queue is full.
                         # Continue trying to send the message until a client connects or the running flag is cleared.
