@@ -1,0 +1,16 @@
+[Unit]
+Description=psen_processing service
+After=docker.service
+Requires=docker.service
+
+[Install]
+WantedBy=default.target
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill psen_SARES11-SPEC125-M2
+ExecStartPre=-/usr/bin/docker rm psen_SARES11-SPEC125-M2
+ExecStartPre=/usr/bin/docker pull docker.psi.ch:5000/psen_processing
+ExecStart=/usr/bin/docker run --name psen_SARES11-SPEC125-M2 --net=host docker.psi.ch:5000/psen_processing psen_processing tcp://daqsf-sioc-cs-82:9010 SARES11-SPEC125-M2 --output_stream_port 8895 --rest_api_port 11002 --log_level=INFO --auto_start
+ExecStop=/usr/bin/docker stop psen_SARES11-SPEC125-M2
+Restart=always
