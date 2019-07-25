@@ -10,7 +10,7 @@ WantedBy=default.target
 TimeoutStartSec=0
 ExecStartPre=-/usr/bin/docker kill psen_SLAAR11-LCAM-C422
 ExecStartPre=-/usr/bin/docker rm ppsen_SLAAR11-LCAM-C422
-ExecStartPre=/usr/bin/docker pull docker.psi.ch:5000/psen_processing
-ExecStart=/usr/bin/docker run --name psen_SLAAR11-LCAM-C422 --net=host docker.psi.ch:5000/psen_processing psen_processing tcp://daqsf-sioc-cs-81:8120 SLAAR11-LCAM-C422 --output_stream_port 8890 --rest_api_port 11001 --log_level=INFO --auto_start
+ExecStartPre=/usr/bin/docker pull paulscherrerinstitute/psen_processing
+ExecStart=/usr/bin/docker run --name psen_SLAAR11-LCAM-C422 --net=host paulscherrerinstitute/psen_processing psen_processing tcp://daqsf-sioc-cs-81:8120 SLAAR11-LCAM-C422 --output_stream_port 8890 --rest_api_port 11001 --log_level=INFO --auto_start
 ExecStop=/usr/bin/docker stop psen_SLAAR11-LCAM-C422
 Restart=always
