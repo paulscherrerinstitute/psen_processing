@@ -33,8 +33,8 @@ def process_image(image, image_property_name, roi_signal, roi_background):
     return processed_data
 
 
-def get_stream_processor(input_stream_host, input_stream_port, output_stream_port, epics_pv_name_prefix):
-
+def get_stream_processor(input_stream_host, input_stream_port, data_output_stream_port,
+                         image_output_stream_port, epics_pv_name_prefix):
     def stream_processor(running_flag, roi_signal, roi_background, statistics):
         try:
             running_flag.set()
@@ -42,59 +42,67 @@ def get_stream_processor(input_stream_host, input_stream_port, output_stream_por
             _logger.info("Connecting to input_stream_host %s and input_stream_port %s.",
                          input_stream_host, input_stream_port)
 
-            _logger.info("Sending out data on stream port %s.", output_stream_port)
+            _logger.info("Sending out data on stream port %s.", data_output_stream_port)
 
             with source(host=input_stream_host, port=input_stream_port, mode=PULL,
                         queue_size=config.INPUT_STREAM_QUEUE_SIZE,
                         receive_timeout=config.INPUT_STREAM_RECEIVE_TIMEOUT) as input_stream:
 
-                with sender(port=output_stream_port, send_timeout=config.OUTPUT_STREAM_SEND_TIMEOUT) as output_stream:
+                with sender(port=data_output_stream_port,
+                            send_timeout=config.DATA_OUTPUT_STREAM_SEND_TIMEOUT) as data_output_stream:
 
-                    statistics["processing_start_time"] = str(datetime.datetime.now())
-                    statistics["last_sent_pulse_id"] = None
-                    statistics["last_sent_time"] = None
-                    statistics["n_processed_images"] = 0
+                    with sender(port=image_output_stream_port, block=False,
+                                queue_size=config.IMAGE_OUTPUT_STREAM_QUEUE_SIZE) as image_output_stream:
 
-                    image_property_name = epics_pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE
+                        statistics["processing_start_time"] = str(datetime.datetime.now())
+                        statistics["last_sent_pulse_id"] = None
+                        statistics["last_sent_time"] = None
+                        statistics["n_processed_images"] = 0
 
-                    _logger.info("Using image property name '%s'.", image_property_name)
+                        image_property_name = epics_pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE
 
-                    while running_flag.is_set():
+                        _logger.info("Using image property name '%s'.", image_property_name)
 
-                        message = input_stream.receive()
-
-                        if message is None:
-                            continue
-
-                        pulse_id = message.data.pulse_id
-                        timestamp = (message.data.global_timestamp, message.data.global_timestamp_offset)
-
-                        _logger.debug("Received message with pulse_id %s", pulse_id)
-
-                        image = message.data.data[image_property_name].value
-
-                        processed_data = process_image(image, image_property_name, roi_signal, roi_background)
-
-                        # append_message_data(message=message, destination=processed_data)
-
-                        # The send method raises Again if there is no consumer and the output queue is full.
-                        # Continue trying to send the message until a client connects or the running flag is cleared.
                         while running_flag.is_set():
-                            try:
-                                output_stream.send(pulse_id=pulse_id,
-                                                   timestamp=timestamp,
-                                                   data=processed_data)
 
-                                _logger.debug("Sent message with pulse_id %s", pulse_id)
+                            message = input_stream.receive()
+
+                            if message is None:
+                                continue
+
+                            pulse_id = message.data.pulse_id
+                            timestamp = (message.data.global_timestamp, message.data.global_timestamp_offset)
+
+                            _logger.debug("Received message with pulse_id %s", pulse_id)
+
+                            image = message.data.data[image_property_name].value
+                            processed_data = process_image(image, image_property_name, roi_signal, roi_background)
+
+                            # Send out processed data.
+                            try:
+                                data_output_stream.send(pulse_id=pulse_id,
+                                                        timestamp=timestamp,
+                                                        data=processed_data)
+
+                                _logger.debug("Sent data message with pulse_id %s", pulse_id)
 
                                 statistics["last_sent_pulse_id"] = pulse_id
                                 statistics["last_sent_time"] = str(datetime.datetime.now())
                                 statistics["n_processed_images"] = statistics.get("n_processed_images", 0) + 1
 
-                                break
+                            except Again:
+                                pass
+
+                            # Send out image.
+                            try:
+                                image_output_stream.send(pulse_id=pulse_id,
+                                                         timestamp=timestamp,
+                                                         data={image_property_name: image})
+
+                                _logger.debug("Sent image message with pulse_id %s", pulse_id)
 
                             except Again:
-                                continue
+                                pass
 
         except Exception as e:
             _logger.error("Error while processing the stream. Exiting. Error: ", e)
