@@ -1,4 +1,5 @@
 import unittest
+from threading import Thread
 from time import sleep
 
 import numpy
@@ -28,7 +29,8 @@ class TestClient(unittest.TestCase):
 
         def process_data():
             start_processing(input_stream="tcp://localhost:11000",
-                             output_stream_port=12000,
+                             data_output_stream_port=12000,
+                             image_output_stream_port=12001,
                              rest_api_interface="0.0.0.0",
                              rest_api_port=10000,
                              epics_pv_name_prefix=self.pv_name_prefix,
@@ -37,13 +39,12 @@ class TestClient(unittest.TestCase):
         self.sending_process = Process(target=send_data)
         self.processing_process = Process(target=process_data)
 
-        self.sending_process.start()
         self.processing_process.start()
 
         sleep(1)
 
     def tearDown(self):
-        if self.sending_process:
+        if self.sending_process and self.sending_process.is_alive():
             self.sending_process.terminate()
 
         if self.processing_process:
@@ -88,6 +89,9 @@ class TestClient(unittest.TestCase):
         processed_data = []
 
         with source(host="localhost", port=12000, mode=PULL, receive_timeout=1000) as input_stream:
+            self.sending_process.start()
+            sleep(0.5)
+
             for index in range(self.n_images):
                 processed_data.append(input_stream.receive())
 
@@ -125,6 +129,8 @@ class TestClient(unittest.TestCase):
         processed_data = []
 
         with source(host="localhost", port=12000, mode=PULL, receive_timeout=1000) as input_stream:
+            self.sending_process.start()
+            sleep(0.5)
             for index in range(self.n_images):
                 processed_data.append(input_stream.receive())
 
@@ -133,20 +139,32 @@ class TestClient(unittest.TestCase):
 
         data_to_send = {self.pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE: self.image}
 
-        with sender(port=11000) as output_stream:
-            for x in range(self.n_images):
-                output_stream.send(data=data_to_send)
+        def send_data():
+            with sender(port=11000) as output_stream:
+                for x in range(self.n_images):
+                    output_stream.send(data=data_to_send)
 
-        with source(host="localhost", port=12000, mode=PULL, receive_timeout=1000) as input_stream:
-            for index in range(self.n_images):
-                processed_data.append(input_stream.receive())
+        def receive_data():
+            with source(host="localhost", port=12000, mode=PULL, receive_timeout=1000) as input_stream:
+                for index in range(self.n_images):
+                    processed_data.append(input_stream.receive())
+
+        send_thread = Thread(target=send_data)
+        receive_thread = Thread(target=receive_data)
+
+        receive_thread.start()
+        sleep(0.5)
+        send_thread.start()
+
+        send_thread.join()
+        receive_thread.join()
 
         client.stop()
 
         processing_parameters_name = self.pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE + ".processing_parameters"
 
         start_processing_parameters = json.loads(processed_data[0].data.data[processing_parameters_name].value)
-        end_processing_parameters = json.loads(processed_data[9].data.data[processing_parameters_name].value)
+        end_processing_parameters = json.loads(processed_data[-1].data.data[processing_parameters_name].value)
 
         self.assertListEqual(roi_signal, start_processing_parameters["roi_signal"])
         self.assertListEqual(updated_roi_signal, end_processing_parameters["roi_signal"])
@@ -165,6 +183,8 @@ class TestClient(unittest.TestCase):
         processed_data = []
 
         with source(host="localhost", port=12000, mode=PULL, receive_timeout=1000) as input_stream:
+            self.sending_process.start()
+            sleep(0.5)
             for index in range(self.n_images):
                 processed_data.append(input_stream.receive())
 
@@ -192,7 +212,8 @@ class TestClient(unittest.TestCase):
         stop_process = Process(target=stop_client)
         stop_process.start()
 
-        sleep(0.5)
+        # Input stream receive timeout is 1 second.
+        sleep(1.5)
 
         if stop_process.is_alive() and not stop_process.join(timeout=3):
             stop_process.terminate()
@@ -205,11 +226,14 @@ class TestClient(unittest.TestCase):
         processed_data = []
 
         with source(host="localhost", port=12000, mode=PULL, receive_timeout=1000) as input_stream:
+            self.sending_process.start()
+            sleep(0.5)
+
             for index in range(self.n_images):
 
                 if index == 2:
                     # Wait for the send timeout to happen.
-                    sleep(config.OUTPUT_STREAM_SEND_TIMEOUT + 1)
+                    sleep(config.DATA_OUTPUT_STREAM_SEND_TIMEOUT + 1)
 
                 processed_data.append(input_stream.receive())
 

@@ -74,6 +74,7 @@ class TestProcessing(unittest.TestCase):
         data_to_send = {pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE: image}
 
         def send_data():
+            sleep(1)
             with sender(port=10000) as output_stream:
                 for x in range(n_images):
                     output_stream.send(data=data_to_send)
@@ -81,7 +82,8 @@ class TestProcessing(unittest.TestCase):
         def process_data(event):
             stream_processor = get_stream_processor(input_stream_host="localhost",
                                                     input_stream_port=10000,
-                                                    output_stream_port=11000,
+                                                    data_output_stream_port=11000,
+                                                    image_output_stream_port=11001,
                                                     epics_pv_name_prefix=pv_name_prefix)
 
             stream_processor(event, original_roi_signal, original_roi_background, {})
@@ -94,11 +96,11 @@ class TestProcessing(unittest.TestCase):
         send_process.start()
         processing_process.start()
 
-        final_data = []
+        data_received = []
 
-        with source(host="localhost", port=11000, mode=PULL, receive_timeout=1000) as input_stream:
+        with source(host="localhost", port=11000, mode=PULL, receive_timeout=2000) as input_stream:
             for _ in range(n_images):
-                final_data.append(input_stream.receive())
+                data_received.append(input_stream.receive())
 
         running_event.clear()
 
@@ -107,23 +109,23 @@ class TestProcessing(unittest.TestCase):
         send_process.terminate()
         processing_process.terminate()
 
-        self.assertEqual(len(final_data), n_images)
+        self.assertEqual(len(data_received), n_images)
 
-        parameters = final_data[0].data.data[pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE +
-                                             ".processing_parameters"].value
+        parameters = data_received[0].data.data[pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE +
+                                                ".processing_parameters"].value
         processing_parameters = json.loads(parameters)
 
         self.assertEqual(processing_parameters["roi_signal"], original_roi_signal)
         self.assertEqual(processing_parameters["roi_background"], original_roi_background)
 
-        roi_signal = final_data[0].data.data[pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE +
-                                             ".roi_signal_x_profile"].value
+        roi_signal = data_received[0].data.data[pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE +
+                                                ".roi_signal_x_profile"].value
 
         self.assertEqual(len(roi_signal), 1024)
         self.assertListEqual(list(roi_signal), [1024] * 1024)
 
-        roi_background = final_data[0].data.data[pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE +
-                                                 ".roi_background_x_profile"].value
+        roi_background = data_received[0].data.data[pv_name_prefix + config.EPICS_PV_SUFFIX_IMAGE +
+                                                    ".roi_background_x_profile"].value
 
         self.assertEqual(len(roi_background), 100)
         self.assertListEqual(list(roi_background), [100] * 100)
