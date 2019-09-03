@@ -1,5 +1,5 @@
 #!/bin/bash
-VERSION=1.2.1
+VERSION=1.2.2
 
 docker build --no-cache=true -t paulscherrerinstitute/psen_processing .
 docker tag paulscherrerinstitute/psen_processing paulscherrerinstitute/psen_processing:$VERSION
