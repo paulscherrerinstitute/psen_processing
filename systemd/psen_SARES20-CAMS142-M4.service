@@ -1,0 +1,16 @@
+[Unit]
+Description=psen_processing service
+After=docker.service
+Requires=docker.service
+
+[Install]
+WantedBy=default.target
+
+[Service]
+TimeoutStartSec=0
+ExecStartPre=-/usr/bin/docker kill psen_SARES20-CAMS142-M4
+ExecStartPre=-/usr/bin/docker rm psen_SARES20-CAMS142-M4
+ExecStartPre=/usr/bin/docker pull paulscherrerinstitute/psen_processing
+ExecStart=/usr/bin/docker run --name psen_SARES20-CAMS142-M4 --net=host paulscherrerinstitute/psen_processing psen_processing tcp://daqsf-sioc-cs-85:9000 SARES20-CAMS142-M4 --data_output_stream_port 9885 --image_output_stream_port 9886 --rest_api_port 12003 --log_level=INFO --auto_start
+ExecStop=/usr/bin/docker stop psen_SARES20-CAMS142-M4
+Restart=always
